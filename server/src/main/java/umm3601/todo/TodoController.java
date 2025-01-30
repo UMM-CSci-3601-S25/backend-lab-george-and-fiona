@@ -33,8 +33,10 @@ public class TodoController implements Controller {
 
   private static final String API_TODOS = "/api/todos";
   private static final String API_TODO_BY_ID = "/api/todos/{id}";
+
   static final String LIMIT_KEY = "limit";
   static final String STATUS_KEY = "status";
+  static final String BODY_CONTAINS_KEY = "contains";
   static final String OWNER_KEY = "owner";
   static final String CATEGORY_KEY = "category";
   static final String SORT_ORDER_KEY = "sortorder";
@@ -130,27 +132,50 @@ public class TodoController implements Controller {
 
 
 
-    // Filter by status
+
+
+
+
+    // checks if the status is true or false, also checks for complete or incomplete
     if (ctx.queryParamMap().containsKey(STATUS_KEY)) {
-      boolean targetStatus = ctx.queryParamAsClass(STATUS_KEY, Boolean.class)
-        .check(it -> it == true || it == false, "Todo status must be true or false")
-        .get();
+      String statusParam = ctx.queryParam(STATUS_KEY);
+      boolean targetStatus;
+      if (statusParam.equalsIgnoreCase("complete") || statusParam.equalsIgnoreCase("true")) {
+      targetStatus = true;
+      } else if (statusParam.equalsIgnoreCase("incomplete") || statusParam.equalsIgnoreCase("false")) {
+      targetStatus = false;
+      } else {
+      throw new BadRequestResponse("Todo status must be 'complete', 'incomplete', 'true', or 'false'");
+      }
       filters.add(eq(STATUS_KEY, targetStatus));
     }
 
 
+    // checks for if there is a specific body content
+    if (ctx.queryParamMap().containsKey(BODY_CONTAINS_KEY)) {
+      String targetContent = ctx.queryParam(BODY_CONTAINS_KEY);
+      Pattern pattern = Pattern.compile(targetContent, Pattern.CASE_INSENSITIVE);
+      filters.add(regex("body", pattern));
+    }
+
+
+    // checks for what owner ########### NOT WORKING ##########
+    if (ctx.queryParamMap().containsKey(OWNER_KEY)) {
+      String targetOwner = ctx.queryParam(OWNER_KEY);
+      filters.add(regex("owner", Pattern.compile(targetOwner, Pattern.CASE_INSENSITIVE)));
+    }
 
 
 
-
-
-
+    // checks for what category the todo is in ########## NOT WORKING ##########
     if (ctx.queryParamMap().containsKey(CATEGORY_KEY)) {
       String category = ctx.queryParamAsClass(CATEGORY_KEY, String.class)
         .check(it -> it.matches(CATEGORY_REGEX), "Todo must have a legal Todo role")
         .get();
       filters.add(eq(CATEGORY_KEY, category));
     }
+
+
 
     // Combine the list of filters into a single filtering document.
     Bson combinedFilter = filters.isEmpty() ? new Document() : and(filters);
@@ -173,6 +198,8 @@ public class TodoController implements Controller {
    * @return a Bson sorting document that can be used in the `sort` method
    *  to sort the database collection of Todos
    */
+
+
   private Bson constructSortingOrder(Context ctx) {
     // Sort the results. Use the `sortby` query param (default "name")
     // as the field to sort by, and the query param `sortorder` (default
@@ -182,6 +209,9 @@ public class TodoController implements Controller {
     Bson sortingOrder = sortOrder.equals("desc") ?  Sorts.descending(sortBy) : Sorts.ascending(sortBy);
     return sortingOrder;
   }
+
+
+
 
   private int limit(Context ctx) {
 
