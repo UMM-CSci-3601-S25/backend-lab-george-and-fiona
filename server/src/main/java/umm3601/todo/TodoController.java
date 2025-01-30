@@ -41,6 +41,29 @@ public class TodoController implements Controller {
   static final String CATEGORY_KEY = "category";
   static final String SORT_ORDER_KEY = "sortorder";
 
+
+
+
+  // LIST OF ALL COMMANDS THAT CAN BE USED
+
+  // limit, limits the number of todos that are returned
+  // status, returns either complete or incomplete todos
+  // contains, returns todos that contain a specific string in the body
+  // owner. returns todos that are assigned to a specific owner
+  // category, returns todos that are in a specific category
+  // orderBy, lets you sort in the field you want order
+
+
+
+
+
+
+
+
+
+
+
+
   private static final String CATEGORY_REGEX = "^(video games|homework|groceries|software design)$";
 
   private final JacksonMongoCollection<Todo> todoCollection;
@@ -110,19 +133,6 @@ public class TodoController implements Controller {
     ctx.status(HttpStatus.OK);
   }
 
-  /**
-   * Construct a Bson filter document to use in the `find` method based on the
-   * query parameters from the context.
-   *
-   * This checks for the presence of the `age`, `company`, and `role` query
-   * parameters and constructs a filter document that will match Todos with
-   * the specified values for those fields.
-   *
-   * @param ctx a Javalin HTTP context, which contains the query parameters
-   *    used to construct the filter
-   * @return a Bson filter document that can be used in the `find` method
-   *   to filter the database collection of Todos
-   */
 
 
 
@@ -151,7 +161,10 @@ public class TodoController implements Controller {
     }
 
 
+
+
     // checks for if there is a specific body content
+    // returns [] if no body content is found
     if (ctx.queryParamMap().containsKey(BODY_CONTAINS_KEY)) {
       String targetContent = ctx.queryParam(BODY_CONTAINS_KEY);
       Pattern pattern = Pattern.compile(targetContent, Pattern.CASE_INSENSITIVE);
@@ -159,7 +172,8 @@ public class TodoController implements Controller {
     }
 
 
-    // checks for what owner ########### NOT WORKING ##########
+    // checks for what owner the todo is assigned to
+    // returns [] if no owner is found
     if (ctx.queryParamMap().containsKey(OWNER_KEY)) {
       String targetOwner = ctx.queryParam(OWNER_KEY);
       filters.add(regex("owner", Pattern.compile(targetOwner, Pattern.CASE_INSENSITIVE)));
@@ -167,13 +181,18 @@ public class TodoController implements Controller {
 
 
 
-    // checks for what category the todo is in ########## NOT WORKING ##########
+
+
+    // checks for what category the todo is in
+    // returns error if category does not exist
     if (ctx.queryParamMap().containsKey(CATEGORY_KEY)) {
       String category = ctx.queryParamAsClass(CATEGORY_KEY, String.class)
-        .check(it -> it.matches(CATEGORY_REGEX), "Todo must have a legal Todo role")
+        .check(it -> it.matches(CATEGORY_REGEX), "Todo must have a legal Todo category") // error message, want to see if i can use this code in other parts of the code
         .get();
       filters.add(eq(CATEGORY_KEY, category));
     }
+
+
 
 
 
@@ -183,79 +202,65 @@ public class TodoController implements Controller {
     return combinedFilter;
   }
 
-  /**
-   * Construct a Bson sorting document to use in the `sort` method based on the
-   * query parameters from the context.
-   *
-   * This checks for the presence of the `sortby` and `sortorder` query
-   * parameters and constructs a sorting document that will sort Todos by
-   * the specified field in the specified order. If the `sortby` query
-   * parameter is not present, it defaults to "name". If the `sortorder`
-   * query parameter is not present, it defaults to "asc".
-   *
-   * @param ctx a Javalin HTTP context, which contains the query parameters
-   *   used to construct the sorting order
-   * @return a Bson sorting document that can be used in the `sort` method
-   *  to sort the database collection of Todos
-   */
+
+
+
+
+
+
+
+
+  // #########################NEW METHOD FOR ORDERING TODOS#######################
+
 
 
   private Bson constructSortingOrder(Context ctx) {
-    // Sort the results. Use the `sortby` query param (default "name")
+    // Sort the results. Use the `orderBy` query param (default "owner")
     // as the field to sort by, and the query param `sortorder` (default
     // "asc") to specify the sort order.
-    String sortBy = Objects.requireNonNullElse(ctx.queryParam("sortby"), "owner");
+
+    String sortBy = Objects.requireNonNullElse(ctx.queryParam("orderBy"), "owner");
     String sortOrder = Objects.requireNonNullElse(ctx.queryParam("sortorder"), "asc");
-    Bson sortingOrder = sortOrder.equals("desc") ?  Sorts.descending(sortBy) : Sorts.ascending(sortBy);
+    Bson sortingOrder = sortOrder.equals("desc") ? Sorts.descending(sortBy) : Sorts.ascending(sortBy);
     return sortingOrder;
   }
 
 
 
 
+
+
+  // #########################NEW METHOD FOR LIMITING TODOS#######################
+
   private int limit(Context ctx) {
-
-
-      if (ctx.queryParamMap().containsKey(LIMIT_KEY)) {
+    if (ctx.queryParamMap().containsKey(LIMIT_KEY)) {
       int targetLimit = ctx.queryParamAsClass(LIMIT_KEY, Integer.class)
-      .check(it -> it > 0, "Todo limit must be greater than 0, you gave" + ctx.queryParam(LIMIT_KEY))
-      .get();
-
+        .check(it -> it > 0, "Todo limit must be greater than 0, you gave " + ctx.queryParam(LIMIT_KEY))
+        .get();
       return targetLimit;
-
-    }
-    else {
+    } else {
       return (int) todoCollection.countDocuments();
     }
-
   }
+
+
+
+
+
+
+
+
+
+
+
+
+
   /**
-   * Setup routes for the `Todo` collection endpoints.
+   * Get a JSON response with a list of all the Todos.
    *
-   * These endpoints are:
-   *   - `GET /api/Todos/:id`
-   *       - Get the specified Todo
-   *   - `GET /api/Todos?age=NUMBER&company=STRING&name=STRING`
-   *      - List Todos, filtered using query parameters
-   *      - `age`, `company`, and `name` are optional query parameters
-   *   - `GET /api/TodosByCompany`
-   *     - Get Todo names and IDs, possibly filtered, grouped by company
-   *   - `DELETE /api/Todos/:id`
-   *      - Delete the specified Todo
-   *   - `POST /api/Todos`
-   *      - Create a new Todo
-   *      - The Todo info is in the JSON body of the HTTP request
-   *
-   * GROUPS SHOULD CREATE THEIR OWN CONTROLLERS THAT IMPLEMENT THE
-   * `Controller` INTERFACE FOR WHATEVER DATA THEY'RE WORKING WITH.
-   * You'll then implement the `addRoutes` method for that controller,
-   * which will set up the routes for that data. The `Server#setupRoutes`
-   * method will then call `addRoutes` for each controller, which will
-   * add the routes for that controller's data.
-   *
-   * @param server The Javalin server instance
-   * @param TodoController The controller that handles the Todo endpoints
+   * @param ctx a Javalin HTTP context
    */
+
   public void addRoutes(Javalin server) {
     // Get the specified Todo
     server.get(API_TODO_BY_ID, this::getTodo);
