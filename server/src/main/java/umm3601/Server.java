@@ -9,7 +9,7 @@ import com.mongodb.client.MongoClients;
 
 import org.bson.UuidRepresentation;
 
-import io.javalin.Javalin;
+import io.javalin.Javalin;  
 import io.javalin.http.InternalServerErrorResponse;
 
 /**
@@ -43,7 +43,7 @@ public class Server {
     // we'd be using the modified array without realizing it.
     this.controllers = Arrays.copyOf(controllers, controllers.length);
   }
-
+  
   /**
    * Setup the MongoDB database connection.
    *
