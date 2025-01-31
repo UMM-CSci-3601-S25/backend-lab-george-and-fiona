@@ -113,4 +113,7 @@
       "zstd"
     ],
     "angular.enable-experimental-ivy-prompt": false,
+    "githubPullRequests.ignoredPullRequestBranches": [
+      "main"
+    ],
 }
