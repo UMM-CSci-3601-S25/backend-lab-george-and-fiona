@@ -31,7 +31,6 @@ public class Todo {
   public String owner;
   public boolean status;
   public String body;
-  //public String contains;
   public String category;
   public String limit;
 

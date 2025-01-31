@@ -50,13 +50,8 @@ public class TodoController implements Controller {
   // status, returns either complete or incomplete todos
   // contains, returns todos that contain a specific string in the body
   // owner. returns todos that are assigned to a specific owner
-  // category, returns todos that are in a specific category
+  // category, returns todos that are in a specific category, video games|homework|groceries|software design
   // orderBy, lets you sort in the field you want order
-
-
-
-
-
 
 
 
@@ -145,7 +140,6 @@ public class TodoController implements Controller {
 
 
 
-
     // checks if the status is true or false, also checks for complete or incomplete
     if (ctx.queryParamMap().containsKey(STATUS_KEY)) {
       String statusParam = ctx.queryParam(STATUS_KEY);
@@ -155,7 +149,7 @@ public class TodoController implements Controller {
       } else if (statusParam.equalsIgnoreCase("incomplete") || statusParam.equalsIgnoreCase("false")) {
       targetStatus = false;
       } else {
-      throw new BadRequestResponse("Todo status must be 'complete', 'incomplete', 'true', or 'false'");
+      throw new BadRequestResponse("Todo status must be 'complete', 'incomplete', 'true', or 'false'"); // throws an error if the status is not complete or incomplete
       }
       filters.add(eq(STATUS_KEY, targetStatus));
     }
