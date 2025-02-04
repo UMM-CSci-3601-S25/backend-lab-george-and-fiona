@@ -66,8 +66,8 @@ import io.javalin.validation.Validator;
 class TodoControllerSpec {
 
   // Declaring variables for the TodoController and other things we need
-  
-  
+
+
   // A Mongo object ID that is initialized in `setupEach()` and used
   // in a few of the tests. It isn't used all that often, though,
   // which suggests that maybe we should extract the tests that
@@ -92,7 +92,7 @@ class TodoControllerSpec {
 
 
 
-  
+
 
     /**
    * Sets up (the connection to the) DB once; that connection and DB will
@@ -183,7 +183,7 @@ class TodoControllerSpec {
         // Now, go ahead and ask the userController to getUsers
     // (which will, indeed, ask the context for its queryParamMap)
     todoController.getTodos(ctx);
-    
+
     // We are going to capture an argument to a function, and the type of
     // that argument will be of type ArrayList<User> (we said so earlier
     // using a Mockito annotation like this):
@@ -224,6 +224,15 @@ class TodoControllerSpec {
     }
   }
 
+
+
+
+
+
+  //############# DOES NOT WORK ##########################################################################
+
+
+
   @Test
   void respondsAppropriatelyToNonBooleanStatus() {
     Map<String, List<String>> queryParams = new HashMap<>();
@@ -240,6 +249,47 @@ class TodoControllerSpec {
     assertTrue(exceptionCause.getMessage().contains(illegalBooleanString));
   }
 
+
+
+
+  //error message:
+
+  //  org.opentest4j.AssertionFailedError: Unexpected exception type thrown, expected: <io.javalin.validation.ValidationException> but was: <io.javalin.http.BadRequestResponse>
+  //	at app//org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+  //	at app//org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:67)
+  //	at app//org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:35)
+  //	at app//org.junit.jupiter.api.Assertions.assertThrows(Assertions.java:3128)
+  //	at app//umm3601.todo.TodoControllerSpec.respondsAppropriatelyToNonBooleanStatus(TodoControllerSpec.java:241)
+  //	at java.base@21.0.6/java.lang.reflect.Method.invoke(Method.java:580)
+  //	at java.base@21.0.6/java.util.ArrayList.forEach(ArrayList.java:1596)
+  //	at java.base@21.0.6/java.util.ArrayList.forEach(ArrayList.java:1596)
+  //Caused by: io.javalin.http.BadRequestResponse: Todo status must be 'complete', 'incomplete', 'true', or 'false'
+  //	at app//umm3601.todo.TodoController.constructFilter(TodoController.java:152)
+  //	at app//umm3601.todo.TodoController.getTodos(TodoController.java:109)
+  //	at app//umm3601.todo.TodoControllerSpec.lambda$respondsAppropriatelyToNonBooleanStatus$1(TodoControllerSpec.java:242)
+  //	at app//org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:53)
+  //	... 6 more
+
+
+
+  //############# DOES NOT WORK ##########################################################################
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  //############# DOES NOT WORK ##########################################################################
   @Test
   void canGetTodosWithCategory() throws IOException {
     Map<String, List<String>> queryParams = new HashMap<>();
@@ -256,6 +306,30 @@ class TodoControllerSpec {
       assertEquals("software design", todo.category);
     }
   }
+
+
+
+
+
+
+// error message:
+
+//  java.lang.NullPointerException: Cannot invoke "io.javalin.validation.Validator.check(kotlin.jvm.functions.Function1, String)" because the return value of "io.javalin.http.Context.queryParamAsClass(String, java.lang.Class)" is null
+//	at umm3601.todo.TodoController.constructFilter(TodoController.java:184)
+//	at umm3601.todo.TodoController.getTodos(TodoController.java:109)
+//	at umm3601.todo.TodoControllerSpec.canGetTodosWithCategory(TodoControllerSpec.java:250)
+//	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+//	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+//	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+//
+
+
+  //############# DOES NOT WORK ##########################################################################
+
+
+
+
+
 
   @Test
   void getTodoWithExistentId() throws IOException {
