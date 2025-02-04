@@ -181,7 +181,7 @@ class UserControllerSpec {
 
 
 
-  
+
 
   @Test
   void addsRoutes() {
@@ -229,6 +229,10 @@ class UserControllerSpec {
         db.getCollection("users").countDocuments(),
         userArrayListCaptor.getValue().size());
   }
+
+
+
+
 
   /**
    * Confirm that if we process a request for users with age 37,
