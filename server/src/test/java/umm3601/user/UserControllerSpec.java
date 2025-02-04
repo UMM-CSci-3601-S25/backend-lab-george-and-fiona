@@ -179,6 +179,10 @@ class UserControllerSpec {
     userController = new UserController(db);
   }
 
+
+
+  
+
   @Test
   void addsRoutes() {
     Javalin mockServer = mock(Javalin.class);
@@ -187,6 +191,10 @@ class UserControllerSpec {
     verify(mockServer, Mockito.atLeastOnce()).post(any(), any());
     verify(mockServer, Mockito.atLeastOnce()).delete(any(), any());
   }
+
+
+
+
 
   @Test
   void canGetAllUsers() throws IOException {
